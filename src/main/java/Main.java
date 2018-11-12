@@ -16,12 +16,15 @@ public class Main {
         List list = query.list();
 
         Message message = (Message)list.get(0);
-        System.out.println(message.getBody());
+        System.out.println(message.getDate());
+        System.out.println(list.size());
 
         Query query2 = session.createQuery("from Employee where firstName = 'Lynn' ");
         List list2 = query2.list();
 
         Employee employee = (Employee) list2.get(0);
         System.out.println(employee.getLastName());
+        session.getTransaction().commit();
+        session.getSessionFactory().close();
     }
 }
