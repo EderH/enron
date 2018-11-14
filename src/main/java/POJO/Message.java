@@ -1,8 +1,11 @@
+package POJO;
+
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import java.sql.Date;
+import java.util.List;
 
 @Entity
 @Table
@@ -12,7 +15,7 @@ public class Message {
     @GeneratedValue
     private int mid;
     private String sender;
-    private Date date;
+    private java.sql.Timestamp date;
     private String message_id;
     private String subject;
     private String body;
@@ -22,13 +25,13 @@ public class Message {
 
     }
 
-    public Message(int mid, String sender, Date date, String message_id, String subject, String body, String folder) {
+    public Message(int mid, String sender, java.sql.Timestamp date, String message_id, String subject, String body, String folder) {
         this.mid = mid;
         this.sender = sender;
         this.date = date;
         this.message_id = message_id;
         this.subject = subject;
-        this.body = body;
+        this.body = body.substring(1,250);
         this.folder = folder;
     }
 
@@ -40,7 +43,7 @@ public class Message {
         return sender;
     }
 
-    public Date getDate() {
+    public java.sql.Timestamp getDate() {
         return date;
     }
 
@@ -68,7 +71,7 @@ public class Message {
         this.sender = sender;
     }
 
-    public void setDate(Date date) {
+    public void setDate(java.sql.Timestamp date) {
         this.date = date;
     }
 
@@ -87,4 +90,5 @@ public class Message {
     public void setFolder(String folder) {
         this.folder = folder;
     }
+
 }

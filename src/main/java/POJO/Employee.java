@@ -1,3 +1,5 @@
+package POJO;
+
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -18,11 +20,11 @@ public class Employee {
 
     }
 
-    public Employee(int eid, String firstName, String lastName, String Email_id) {
+    public Employee(int eid, String firstName, String lastName, String email_id) {
         this.eid = eid;
         this.firstName = firstName;
         this.lastName = lastName;
-        this.email_id = Email_id;
+        this.email_id = email_id;
     }
 
     public int getEid() {
