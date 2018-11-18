@@ -3,16 +3,16 @@ package network;
 public class Node {
     private String address;
     private static int count = 0;
-    private long id;
+    private int id;
     private int inbound = 0;
     private int outbound = 0;
 
     public Node(String address) {
         this.address = address;
-        this.id = ++count;
+        this.id = count++;
     }
 
-    public long getId() {
+    public int getId() {
         return id;
     }
 
@@ -28,7 +28,7 @@ public class Node {
         return outbound;
     }
 
-    public void setId(long id) {
+    public void setId(int id) {
         this.id = id;
     }
 
@@ -50,5 +50,16 @@ public class Node {
 
     public void increaseOutbound() {
         this.outbound++;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if(obj instanceof Node) {
+            Node node = (Node) obj;
+            if(this.getAddress().equals(node.getAddress())) {
+                return true;
+            }
+        }
+        return false;
     }
 }

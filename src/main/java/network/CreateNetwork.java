@@ -27,6 +27,7 @@ public class CreateNetwork {
             Node nodeSender = network.getNode(mail.getSender());
             if(nodeSender == null) {
                 nodeSender = new Node(mail.getSender());
+                network.addNode(nodeSender);
             }
             nodeSender.increaseOutbound();
             for (String receiver : mail.getTo()) {

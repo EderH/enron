@@ -1,7 +1,10 @@
 package network;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+
+import static java.lang.Math.toIntExact;
 
 public class Network {
     private List<Node> nodes;
@@ -47,13 +50,31 @@ public class Network {
         return this.nodes.contains(node);
     }
 
-    public void addEdge(Edge edge) {
-        if(!containsEdge(edge)) {
-            this.edges.add(edge);
+    public void addEdge(Edge newEdge) {
+        if(!containsEdge(newEdge)) {
+            this.edges.add(newEdge);
+        } else {
+            for (Edge edge: this.edges) {
+                if(edge.equals(newEdge)) {
+                    edge.increaseWeight();
+                }
+            }
         }
     }
 
     public boolean containsEdge(Edge edge) {
         return this.edges.contains(edge);
+    }
+
+    public double[][] getAdjacencyMatrix() {
+        double[][] adjacencyMatrix = new double[this.nodes.size()][this.nodes.size()];
+
+
+        for (Edge edge : edges) {
+            adjacencyMatrix[edge.getFrom().getId()][edge.getTo().getId()] = 1;
+            adjacencyMatrix[edge.getTo().getId()][edge.getFrom().getId()] = 1;
+        }
+
+        return adjacencyMatrix;
     }
 }
