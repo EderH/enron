@@ -6,6 +6,7 @@ import network.CreateNetwork;
 import network.Edge;
 import network.Network;
 import network.centrality.BetweennessCentrality;
+import network.centrality.ClosenessCentrality;
 import org.hibernate.Query;
 import org.hibernate.Session;
 
@@ -21,7 +22,7 @@ public class Main {
 
         session.beginTransaction();
         Query query = session.createQuery("FROM Message group by body, sender, subject having count(*) < 2 ");
-        query.setMaxResults(20);
+        query.setMaxResults(5);
         List<Message> messageList = query.list();
 
         List<Mail> mails = new ArrayList<Mail>();
@@ -58,27 +59,31 @@ public class Main {
             System.out.println("From: " + edge.getFrom().getAddress() + " TO: " + edge.getTo().getAddress() + " Weight: " + edge.getWeight());
         }
         double[][] adjacencyMatrix = network.getAdjacencyMatrix();
+
+        System.out.println("Betweenness Centrality:");
         BetweennessCentrality betweennessCentrality = new BetweennessCentrality();
         Map<String, Double> betweennessNetwork = betweennessCentrality.calculateBetweenness(network.getNodes(),adjacencyMatrix);
-        printMap(network, betweennessNetwork);
+        printBetweennessMap(network, betweennessNetwork);
+
+        System.out.println("Closeness Centrality:");
+        ClosenessCentrality closenessCentrality = new ClosenessCentrality();
+        Map<String, Double> closenessNetwork = closenessCentrality.calculateCloseness(network.getNodes(), adjacencyMatrix);
+        printClosenessMap(network, closenessNetwork);
+
     }
 
 
-    private TreeMap<String, Double> sortMap(Network network, Map<String, Double> map) {
-        TreeMap<>
+    private static void printBetweennessMap(Network network, Map<String, Double> map) {
         for (int i = 0; i < network.getNodes().size() ; i++) {
-            if(map.get(network.getNodes().get(i).getAddress()) != 0) {
-                network.getNodes().get(i).getAddress(), map.get(network.getNodes().get(i).getAddress()));
-            }
+            System.out.printf("Employee: %s Betweenness: %.2f \n",network.getNodes().get(i).getAddress(), map.get(network.getNodes().get(i).getAddress()));
         }
     }
 
-
-    private static void printMap(Network network, Map<String, Double> map) {
+    private static void printClosenessMap(Network network, Map<String, Double> map) {
         for (int i = 0; i < network.getNodes().size() ; i++) {
-            if(map.get(network.getNodes().get(i).getAddress()) != 0) {
-                System.out.printf("Employee: %s Betweenness: %.2f \n",network.getNodes().get(i).getAddress(), map.get(network.getNodes().get(i).getAddress()));
-            }
+            //if(map.get(network.getNodes().get(i).getAddress()) != Double.POSITIVE_INFINITY) {
+                System.out.printf("Employee: %s Closeness: %.2f \n",network.getNodes().get(i).getAddress(), map.get(network.getNodes().get(i).getAddress()));
+            //}
         }
     }
 

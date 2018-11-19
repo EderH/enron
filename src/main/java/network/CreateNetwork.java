@@ -18,10 +18,10 @@ public class CreateNetwork {
     public Network call() {
         Network network = new Network();
 
-        for (int i = 0; i < employees.size(); i++) {
+        /*for (int i = 0; i < employees.size(); i++) {
             Employee employee = (Employee)employees.get(i);
             network.addNode(new Node(employee.getEmail_id()));
-        }
+        }*/
         for (int i = 0; i < mails.size(); i++) {
             Mail mail = (Mail)mails.get(i);
             Node nodeSender = network.getNode(mail.getSender());
