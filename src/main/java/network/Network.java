@@ -46,6 +46,15 @@ public class Network {
         return null;
     }
 
+    public Node getNode(int id) {
+        for (Node node : nodes) {
+            if(node.getId() == id){
+                return node;
+            }
+        }
+        return null;
+    }
+
     public boolean containsNode(Node node) {
         return this.nodes.contains(node);
     }

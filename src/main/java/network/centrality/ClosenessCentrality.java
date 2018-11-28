@@ -12,7 +12,7 @@ public class ClosenessCentrality {
 
     }
 
-    public Map<String, Double> calculateCloseness(List<Node> nodeList, double[][] adjacencyMatrix) {
+    public Map<Integer, Double> calculateCloseness(List<Node> nodeList, double[][] adjacencyMatrix) {
         double[][] floydWarshallMatrix = floydWarshall(adjacencyMatrix);
 
         double[] closeness = new double[floydWarshallMatrix.length];
@@ -26,9 +26,9 @@ public class ClosenessCentrality {
             closeness[i] = sumOfDistances / (double)(floydWarshallMatrix.length - 1);
         }
 
-        Map<String, Double> resultMap = new HashMap<String, Double>();
+        Map<Integer, Double> resultMap = new HashMap<Integer, Double>();
         for (int i = 0; i < closeness.length; i++) {
-            resultMap.put(nodeList.get(i).getAddress(), closeness[i]);
+            resultMap.put(nodeList.get(i).getId(), closeness[i]);
         }
 
         return resultMap;

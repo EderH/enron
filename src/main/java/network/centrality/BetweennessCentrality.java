@@ -10,7 +10,7 @@ public class BetweennessCentrality {
 
     }
 
-    public Map<String,Double> calculateBetweenness(List<Node> nodeList, double[][] adjacencyMatrix) {
+    public Map<Integer,Double> calculateBetweenness(List<Node> nodeList, double[][] adjacencyMatrix) {
 
 
         //CB[v] ← 0, v ∈ V ;
@@ -102,9 +102,9 @@ public class BetweennessCentrality {
             }
         }
 
-        Map<String, Double> resultMap = new HashMap<String, Double>();
+        Map<Integer, Double> resultMap = new HashMap<Integer, Double>();
         for (int i = 0; i < C.size(); i++) {
-            resultMap.put(nodeList.get(i).getAddress(), C.get(i));
+            resultMap.put(nodeList.get(i).getId(), C.get(i));
         }
 
         return resultMap;
