@@ -1,5 +1,8 @@
 package network;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Node {
     private String address;
     private static int count = 0;

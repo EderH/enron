@@ -5,6 +5,7 @@ import POJO.RecipientInfo;
 import network.CreateNetwork;
 import network.Edge;
 import network.Network;
+import network.Node;
 import network.centrality.*;
 import org.hibernate.Query;
 import org.hibernate.Session;
@@ -13,25 +14,47 @@ import org.jblas.Eigen;
 import persistent.HibernateUtil;
 import weka.classifiers.meta.FilteredClassifier;
 import weka.clusterers.*;
-import weka.core.Attribute;
-import weka.core.DenseInstance;
-import weka.core.Instance;
-import weka.core.Instances;
+import weka.core.*;
 import weka.experiment.InstanceQuery;
 import weka.filters.unsupervised.attribute.StringToWordVector;
 
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.nio.file.Paths;
 import java.util.*;
 
 public class Main {
 
-    public static void main( String[] args )
-    {
+    public static void main(String[] args) {
 
+        /**
+         * load network from json file.
+         */
+        /*
         JSONReader jsonReader = new JSONReader();
         Network network = jsonReader.readNodes(Paths.get("src/main/resources/java_persons.json").toAbsolutePath().toString());
         jsonReader.readAdjacencyMatrix(Paths.get("src/main/resources/java_network.json").toAbsolutePath().toString(),network);
+
+
+        /**
+         * print edges to txt-file.
+         */
         /*
+        try {
+            PrintWriter writer = new PrintWriter("network.txt", "UTF-8");
+            for (Edge edge:network.getEdges()) {
+                writer.println(edge.getFrom().getId() + "," + edge.getTo().getId());
+            }
+            writer.close();
+        } catch (FileNotFoundException | UnsupportedEncodingException e) {
+            System.err.println(e.getMessage());
+        }
+
+        /**
+         * load data from sql database.
+          */
+
         Session session = HibernateUtil.getSessionFactory().openSession();
 
         session.beginTransaction();
@@ -47,12 +70,15 @@ public class Main {
             Query query3 = session.createQuery("FROM RecipientInfo WHERE mid = :mid");
             query3.setParameter("mid", mail.getMid());
             List<RecipientInfo> receivers = query3.list();
-            for (RecipientInfo receiver:receivers) {
+            for (RecipientInfo receiver : receivers) {
                 to.add(receiver.getRvalue());
             }
             mail.setTo(to);
             mails.add(mail);
         }
+
+        //Query query2 = session.createQuery("from Employee");
+        //List<Employee> employeeList = query2.list();
 
         session.getTransaction().commit();
         session.getSessionFactory().close();
@@ -61,18 +87,12 @@ public class Main {
         long[][] distanceMatrix = kNearestNeighbor.call(list);
         printMatrix(distanceMatrix);
 
-        Query query2 = session.createQuery("from Employee");
-        List<Employee> employeeList = query2.list();
-
-
-
         System.out.println("Network");
         CreateNetwork createNetwork = new CreateNetwork(mails,employeeList);
         Network network = createNetwork.call();
-        System.out.println(network.getNodes().size());
-        System.out.println(network.getEdges().size());
+
         */
-        for (Edge edge:network.getEdges()) {
+        /*for (Edge edge:network.getEdges()) {
             System.out.println("From: " + edge.getFrom().getAddress() + " TO: " + edge.getTo().getAddress() + " Weight: " + edge.getWeight());
         }
         double[][] adjacencyMatrix = network.getAdjacencyMatrix();
@@ -104,13 +124,16 @@ public class Main {
         Map<Integer, Double> normalisedPrincipalEigenvector= eigenvectorCentrality.normalised(principalEigenvector);
         printEigenvectorMap(network, normalisedPrincipalEigenvector);
 
-/*
+ */
         List<List<String>> docs = new ArrayList<>();
         for (int i = 0; i < mails.size(); i++) {
-            StringTokenizer tokenizer = new StringTokenizer(mails.get(i).getBody(), ".,?! ");
+            StringTokenizer tokenizer = new StringTokenizer(mails.get(i).getBody(), "=*^.,?! ");
             List<String> strings = new ArrayList<>();
             while (tokenizer.hasMoreElements()) {
-                strings.add(tokenizer.nextToken());
+                String string = tokenizer.nextToken();
+                string.replaceAll("/[^a-zA-Z0-9]+/", "");
+                string.trim();
+                strings.add(string);
             }
             docs.add(strings);
         }
@@ -120,112 +143,152 @@ public class Main {
             }
             System.out.println();
         }*/
-        /*TFIDFCalculator tfidfCalculator = new TFIDFCalculator();
-        Map<String,Double> map = new HashMap<>();
+
+        TFIDFCalculator tfidfCalculator = new TFIDFCalculator();
+        Map<String, Double> map = new HashMap<>();
         for (int i = 0; i < docs.size(); i++) {
-            for(int j = 0; j < docs.get(i).size(); j++) {
-                map.put(docs.get(i).get(j),tfidfCalculator.tfIdf(docs.get(i), docs, docs.get(i).get(j)));
+            for (int j = 0; j < docs.get(i).size(); j++) {
+                double tfdif = tfidfCalculator.tfIdf(docs.get(i), docs, docs.get(i).get(j));
+                if (map.get(docs.get(i).get(j)) != null) {
+                    if (map.get(docs.get(i).get(j)) < tfdif) {
+                        map.put(docs.get(i).get(j), tfdif);
+                    }
+                } else {
+                    map.put(docs.get(i).get(j), tfdif);
+                }
             }
         }
 
-        for (String string:map.keySet()) {
+        /*for (String string:map.keySet()) {
             System.out.println(string + ": " +map.get(string));
-        }
-        /*
-        for(int i = 0; i < mails.size(); i++)
-        {
-            TFIDFCalculator tfidfCalculator = new TFIDFCalculator();
-            tfidfCalculator.tfIdf(Arrays.asList(mails.get(i).getBody().split(" ")),)
+        }*/
+
+        //List list = getTopKeysWithOccurences(map,10);
+
+        /*for (int i = 0; i < list.size(); i++) {
+            System.out.println(list.get(i));
+        }*/
+
+
+        List<String> keys = new ArrayList<>(map.keySet());
+        Collections.sort(keys);
         ArrayList<Attribute> atts = new ArrayList<Attribute>();
-        atts.add(new Attribute("from"));
-        atts.add(new Attribute("to"));
-        atts.add(new Attribute("body"));
-        Instances data = new Instances("mails", atts, 0);
-
-        for(int i = 0; i < mails.size(); i++)
-        {
-            /*Instance instance = new DenseInstance(3);
-            instance.setDataset(data);
-            System.out.println(mails.get(i).getSender());
-            Attribute from = new Attribute("from");
-            Attribute to = new Attribute("to");
-            Attribute body = new Attribute("body");
-
-            instance.setValue(0,from.indexOfValue(mails.get(i).getSender()));
-            instance.setValue(1,to.indexOfValue(mails.get(i).getTo().get(0)));
-            instance.setValue(2,body.indexOfValue(mails.get(i).getBody()));
-
-            data.add(instance);
-            double[] vals = new double[data.numAttributes()];
-            vals[0] = data.attribute(0).addStringValue(mails.get(i).getSender());
-            System.out.println(vals[0]);
-            vals[1] = data.attribute(1).addStringValue(mails.get(i).getTo().get(0));
-            vals[2] = data.attribute(2).addStringValue(mails.get(i).getBody());
-            data.add(new DenseInstance(1.0, vals));
+        for (int i = 0; i < keys.size(); i++) {
+            atts.add(new Attribute(keys.get(i)));
         }
-        System.out.println(data.size());
-        System.out.println(data);
+        Instances data = new Instances("words", atts, 0);
+        for (int i = 0; i < map.size(); i++) {
+            Instance instance = new DenseInstance(1);
+            instance.setDataset(data);
+            instance.setValue(0, map.get(atts.get(i).name()));
+            data.add(instance);
+        }
+
+        for (Instance in : data) {
+            System.out.println(in.attribute(0).name());
+        }
 
         try {
-            /*ClusterEvaluation eval = new ClusterEvaluation();
-                                        // build clusterer
-            eval.setClusterer(clusterer);                                   // the cluster to evaluate
-            //eval.evaluateClusterer(newData);                                // data to evaluate the clusterer on
-            System.out.println("# of clusters: " + eval.getNumClusters());**/
-            /*String[] options = new String[2];
-            options[0] = "-I";                 // max. iterations
-            options[1] = "100";
-            EM clusterer = new EM();   // new instance of clusterer
-            clusterer.setOptions(options);     // set the options
-            clusterer.buildClusterer(data);*/
-            /*Clusterer clusterer = new SimpleKMeans();
-            ((SimpleKMeans) clusterer).setPreserveInstancesOrder(true);
-            ((SimpleKMeans) clusterer).setNumClusters(3);
+            SimpleKMeans clusterer = new SimpleKMeans();   // new instance of clusterer
+            clusterer.setNumClusters(3);
+            clusterer.setSeed(10);
+
+            clusterer.setMaxIterations(100);
+            clusterer.setPreserveInstancesOrder(true);
             clusterer.buildClusterer(data);
-            int[] assignments  = ((SimpleKMeans) clusterer).getAssignments();
-            int i = 0;
-            for(int clusterNum : assignments) {
-                System.out.printf("Instance %d -> Cluster %d\n", i, clusterNum);
-                i++;
+            System.out.println(clusterer);
+            int[] assignments = clusterer.getAssignments();
+
+            Map<String, Double> cluster0 = new HashMap<>();
+            Map<String, Double> cluster1 = new HashMap<>();
+            Map<String, Double> cluster2 = new HashMap<>();
+
+            Stopwords stopwords = new Stopwords();
+            int instanceNr = 0;
+            for (int clusterNum : assignments) {
+                String word = atts.get(instanceNr).name();
+                System.out.printf("Instance %d -> Cluster %d | Word: %s \n", instanceNr, clusterNum, word);
+                if (clusterNum == 1) {
+                    if (!stopwords.is(word)) {
+                        cluster1.put(word, map.get(word));
+                    }
+                } else if (clusterNum == 2) {
+                    if (!stopwords.is(word)) {
+                        cluster2.put(word, map.get(word));
+                    }
+                } else {
+                    if (!stopwords.is(word)) {
+                        cluster0.put(word, map.get(word));
+                    }
+                }
+                instanceNr++;
             }
-            Clusterer clusterer = new SimpleKMeans();
-            ((SimpleKMeans) clusterer).setPreserveInstancesOrder(true);
-            ((SimpleKMeans) clusterer).setNumClusters(3);
-            StringToWordVector filter = new StringToWordVector();
-            filter.setIDFTransform(true);
-            FilteredClusterer filteredClusterer = new FilteredClusterer();
-            filteredClusterer.setFilter(filter);
-            filteredClusterer.setClusterer(clusterer);
-            filteredClusterer.buildClusterer(data);
-            System.out.println(filteredClusterer);
+            /*for (String word: cluster1) {
+                System.out.println(word);
+            }*/
+
+            int k = 25;
+            List cluster0TopK = getTopKeysWithOccurences(cluster0, cluster0.size() < k ? cluster0.size() : k);
+            List cluster1TopK = getTopKeysWithOccurences(cluster1, cluster1.size() < k ? cluster1.size() : k);
+            List cluster2TopK = getTopKeysWithOccurences(cluster2, cluster2.size() < k ? cluster2.size() : k);
+
+
+            try {
+
+                PrintWriter writer = new PrintWriter("outputCluster0.txt", "UTF-8");
+                for (int i = 0; i < cluster0TopK.size(); i++) {
+                    writer.println(cluster0TopK.get(i));
+                }
+                writer.close();
+                writer = new PrintWriter("outputCluster1.txt", "UTF-8");
+                for (int i = 0; i < cluster1TopK.size(); i++) {
+                        writer.println(cluster1TopK.get(i));
+                }
+                writer.close();
+                writer = new PrintWriter("outputCluster2.txt", "UTF-8");
+            for (int i = 0; i < cluster2TopK.size(); i++) {
+                        writer.println(cluster2TopK.get(i));
+                }
+                writer.close();
+            } catch (FileNotFoundException | UnsupportedEncodingException e) {
+                System.err.println(e.getMessage());
+            }
+
         } catch (Exception e) {
             System.err.println(e.getMessage());
         }
-*/
+
+
+    }
+
+    public static List<Map.Entry<String, Double>> getTopKeysWithOccurences(Map<String, Double> hashmap, int top) {
+        List<Map.Entry<String, Double>> results = new ArrayList<>(hashmap.entrySet());
+        Collections.sort(results, new EntryComparator());
+        return results.subList(0, top);
     }
 
 
     private static void printBetweennessMap(Network network, Map<Integer, Double> map) {
-        for (int i = 0; i < network.getNodes().size() ; i++) {
-            System.out.printf("Employee: %s Betweenness: %.2f \n",network.getNodes().get(i).getAddress(), map.get(network.getNodes().get(i).getId()));
+        for (int i = 0; i < network.getNodes().size(); i++) {
+            System.out.printf("Employee: %s Betweenness: %.2f \n", network.getNodes().get(i).getAddress(), map.get(network.getNodes().get(i).getId()));
         }
     }
 
     private static void printClosenessMap(Network network, Map<Integer, Double> map) {
-        for (int i = 0; i < network.getNodes().size() ; i++) {
-                System.out.printf("Employee: %s Closeness: %.2f \n",network.getNodes().get(i).getAddress(), map.get(network.getNodes().get(i).getId()));
+        for (int i = 0; i < network.getNodes().size(); i++) {
+            System.out.printf("Employee: %s Closeness: %.2f \n", network.getNodes().get(i).getAddress(), map.get(network.getNodes().get(i).getId()));
         }
     }
 
     private static void printEigenvectorMap(Network network, Map<Integer, Double> map) {
-        for (int i = 0; i < network.getNodes().size() ; i++) {
-            System.out.printf("Employee: %s Eigenvector: %.2f \n",network.getNodes().get(i).getAddress(), map.get(network.getNodes().get(i).getId()));
+        for (int i = 0; i < network.getNodes().size(); i++) {
+            System.out.printf("Employee: %s Eigenvector: %.2f \n", network.getNodes().get(i).getAddress(), map.get(network.getNodes().get(i).getId()));
         }
     }
 
     private static void printDegreeMap(Network network, Map<Integer, Integer> map) {
-        for (int i = 0; i < network.getNodes().size() ; i++) {
-            System.out.printf("Employee: %s Degree: %d \n",network.getNodes().get(i).getAddress(), map.get(network.getNodes().get(i).getId()));
+        for (int i = 0; i < network.getNodes().size(); i++) {
+            System.out.printf("Employee: %s Degree: %d \n", network.getNodes().get(i).getAddress(), map.get(network.getNodes().get(i).getId()));
         }
     }
 
