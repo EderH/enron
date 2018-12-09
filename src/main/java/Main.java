@@ -31,12 +31,12 @@ public class Main {
         /**
          * load network from json file.
          */
-        /*
+
         JSONReader jsonReader = new JSONReader();
         Network network = jsonReader.readNodes(Paths.get("src/main/resources/java_persons.json").toAbsolutePath().toString());
         jsonReader.readAdjacencyMatrix(Paths.get("src/main/resources/java_network.json").toAbsolutePath().toString(),network);
-
-
+        List<Mail> mails = jsonReader.readBodyOfMail(Paths.get("src/main/resources/java_mails_6.json").toAbsolutePath().toString());
+        //System.out.println(mails.size());
         /**
          * print edges to txt-file.
          */
@@ -55,7 +55,7 @@ public class Main {
          * load data from sql database.
           */
 
-        Session session = HibernateUtil.getSessionFactory().openSession();
+        /*Session session = HibernateUtil.getSessionFactory().openSession();
 
         session.beginTransaction();
         Query query = session.createQuery("FROM Message group by body, sender, subject having count(*) < 2 ");
@@ -82,7 +82,7 @@ public class Main {
 
         session.getTransaction().commit();
         session.getSessionFactory().close();
-
+*/
         /*KNearestNeighbor kNearestNeighbor = new KNearestNeighbor(list.size());
         long[][] distanceMatrix = kNearestNeighbor.call(list);
         printMatrix(distanceMatrix);

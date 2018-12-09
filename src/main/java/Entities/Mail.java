@@ -83,7 +83,7 @@ public class Mail {
         this.date = date;
     }
 
-    public void setMessagemID(String message_id) {
+    public void setMessageID(String message_id) {
         this.message_id = message_id;
     }
 

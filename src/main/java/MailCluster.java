@@ -9,18 +9,22 @@ import java.util.*;
 
 public class MailCluster {
 
-    public MailCluster() {}
+    public MailCluster() {
+    }
 
     public void call(List<Mail> mails) {
+        Stopwords stopwords = new Stopwords();
         List<List<String>> docs = new ArrayList<>();
-        for (int i = 0; i < mails.size(); i++) {
+        for (int i = 0; i < 100; i++) {
             StringTokenizer tokenizer = new StringTokenizer(mails.get(i).getBody(), "=*^.,?! ");
             List<String> strings = new ArrayList<>();
             while (tokenizer.hasMoreElements()) {
                 String string = tokenizer.nextToken();
                 string.replaceAll("/[^a-zA-Z0-9]+/", "");
                 string.trim();
-                strings.add(string);
+                if (!stopwords.is(string)) {
+                    strings.add(string);
+                }
             }
             docs.add(strings);
         }
@@ -90,23 +94,17 @@ public class MailCluster {
             Map<String, Double> cluster1 = new HashMap<>();
             Map<String, Double> cluster2 = new HashMap<>();
 
-            Stopwords stopwords = new Stopwords();
+
             int instanceNr = 0;
             for (int clusterNum : assignments) {
                 String word = atts.get(instanceNr).name();
                 //System.out.printf("Instance %d -> Cluster %d | Word: %s \n", instanceNr, clusterNum, word);
                 if (clusterNum == 1) {
-                    if (!stopwords.is(word)) {
-                        cluster1.put(word, map.get(word));
-                    }
+                    cluster1.put(word, map.get(word));
                 } else if (clusterNum == 2) {
-                    if (!stopwords.is(word)) {
-                        cluster2.put(word, map.get(word));
-                    }
+                    cluster2.put(word, map.get(word));
                 } else {
-                    if (!stopwords.is(word)) {
-                        cluster0.put(word, map.get(word));
-                    }
+                    cluster0.put(word, map.get(word));
                 }
                 instanceNr++;
             }
